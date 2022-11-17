@@ -58,6 +58,10 @@ func new(host service.Host, spf ServiceProviderFunc)(service.Module, error){
 }
 
 func (m * module) Serve(ctx context.Context)  error{
+	ctx, cancel := context.WithCancel(ctx)
+	defer func(){
+		cancel()
+	}()
 
 	logger := m.host.Logger()
 	grpcServer, err := m.spf(m.host, ctx)
@@ -88,7 +92,6 @@ func (m * module) Serve(ctx context.Context)  error{
 	grpcServer.Register(m.server)
 	reflection.Register(m.server)
 
-	ctx, cancel := context.WithCancel(ctx)
 	var running sync.WaitGroup
 	moduleServer, ok := grpcServer.(service.ModuleServer)
 
