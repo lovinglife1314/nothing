@@ -29,7 +29,7 @@ type WorkServer interface {
 	Register(*grpc.Server)
 }
 
-type ServiceProviderFunc func(service.Host) (WorkServer, error)
+type ServiceProviderFunc func(service.Host, context.Context) (WorkServer, error)
 
 // TODO: support multiple grpc services per grpc module
 func New(spf ServiceProviderFunc) service.ModuleProvider {
@@ -60,7 +60,7 @@ func new(host service.Host, spf ServiceProviderFunc)(service.Module, error){
 func (m * module) Serve(ctx context.Context)  error{
 
 	logger := m.host.Logger()
-	grpcServer, err := m.spf(m.host)
+	grpcServer, err := m.spf(m.host, ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create grpc handler for %s:%s, %w", m.host.Name(), m.host.ModuleName(), err)
 	}
